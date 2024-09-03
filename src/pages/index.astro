@@ -1,5 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+import pepsiLogo from '../images/logo.png'
 
 ---
 
@@ -7,7 +9,10 @@ import Layout from '../layouts/Layout.astro';
 	<main class="md:w-1/2 sm:w-full pt-40  m-auto  flex flex-col justify-between items-center">
 		<div class="min-h-[500px]  flex flex-col justify-between items-center">
 			<div class="text-center">
-				<img src="./../../public/images/pepsi-logo.webp" alt="Logo del juego de FALTA" class="w-1/2 m-auto">
+				<!-- <img src="./../../public/images/pepsi-logo.webp" alt="Logo del juego de FALTA" class="w-1/2 m-auto"> -->
+				<figure class="w-1/2 m-auto">
+					<Image src={pepsiLogo} alt="Un pájaro."/>
+				</figure>
 				<h1 class="text-yellow-400 font-bold text-2xl mt-3">Welcome to the <span>Trivia Game</span></h1>
 			</div>
 	
