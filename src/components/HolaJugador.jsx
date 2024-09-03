@@ -15,7 +15,7 @@ function Instrucciones() {
   }, []);
 
   return (
-    <div className="">
+    <div className="text-zinc-200">
         <span className="font-medium text-2xl block text-center">¡Bienvenido!</span>
         <h2 className="font-bold text-4xl text-center">{apodo}</h2>
         <div className="mt-12">

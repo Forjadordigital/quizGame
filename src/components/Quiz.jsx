@@ -1,24 +1,8 @@
 import { useState, useEffect } from 'preact/hooks';
 import Timer from './Timer.jsx';
 import TiempoFormato from './TiempoFormato.jsx';
-
-function OpcionRespuesta({ texto, esCorrecta, onAnswer }) {
-  const [fondo, setFondo] = useState('bg-slate-200');
-
-  const handleClick = () => {
-    setFondo(esCorrecta ? 'bg-green-500' : 'bg-red-500');
-    onAnswer(esCorrecta);
-  };
-
-  return (
-    <button
-      className={`py-2 px-4 first:mt-4 mb-4 text-slate-700 text-xl font-semibold text-start shadow-lg rounded ${fondo}`}
-      onClick={handleClick}
-    >
-      {texto}
-    </button>
-  );
-}
+import Option from './Option.jsx';
+import ProgressBar from './ProgressBar.jsx';
 
 const Quiz = () => {
   const questions = [
@@ -55,7 +39,6 @@ const Quiz = () => {
   ];
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [isAnswered, setIsAnswered] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [startTimer, setStartTimer] = useState(true);
   const [totalTime, setTotalTime] = useState(0);
@@ -63,50 +46,43 @@ const Quiz = () => {
   const [showFinalTime, setShowFinalTime] = useState(false);
   const [resultsSent, setResultsSent] = useState(false);
 
-  const handleAnswer = (esCorrecta) => {
-    if (esCorrecta) {
-      setIsAnswered(true);
-      setTimeout(() => {
-        setIsAnswered(false);
-        if (currentQuestionIndex < questions.length - 1) {
-          setCurrentQuestionIndex(currentQuestionIndex + 1);
-        } else {
-          setStartTimer(false);
-          setQuizCompleted(true);
-        }
-      }, 1000);
-    }else{
+  const handleAnswer = (isCorrect) => {
+    if (isCorrect) {
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+      } else {
+        setStartTimer(false);
+        setQuizCompleted(true);
+      }
+    } else {
       setIncorrectAnswers(incorrectAnswers + 1);
     }
   };
 
   const handleTimerStop = (time) => {
-    console.log(`Total time captured: ${time} ms`);
     const adjustedTime = time + incorrectAnswers * 500;
-    console.log("El tiempo negativo sumado por erroes es: "+incorrectAnswers * 500)
-    console.log(`Total de penalización: ${adjustedTime} ms`);
     setTotalTime(adjustedTime);
   };
 
-  useEffect(() => {
-    if (quizCompleted && !resultsSent && totalTime > 0) {
-      enviarResultados(totalTime);
-    }
-  }, [quizCompleted, totalTime]);
-
-  const enviarResultados = async (time) => {
+  const enviarResultados = async () => {
     if (resultsSent) return;
-    setResultsSent(true);
+
+    if (totalTime <= 200) {
+      console.warn('El tiempo total es menor o igual a 200 ms, no se enviarán los resultados.');
+      return;
+    }
 
     const apodo = localStorage.getItem('apodo');
     if (apodo) {
       try {
-        const response = await fetch(`/api/actualizaciones?apodo=${apodo}&tiempo=${time}`, {
+        const response = await fetch(`/api/actualizaciones?apodo=${apodo}&tiempo=${totalTime}`, {
           method: 'GET',
         });
         const data = await response.json();
         console.log('Respuesta del servidor:', data);
+        setResultsSent(true);
         setShowFinalTime(true);
+        window.location.href = './resultados';
       } catch (error) {
         console.error('Error al enviar los resultados:', error);
       }
@@ -116,10 +92,11 @@ const Quiz = () => {
   };
 
   return (
-    <div class="w-full flex flex-col justify-center">
+    <div className="w-full flex flex-col justify-center">
       {!showFinalTime && (
         <Timer start={startTimer} reset={false} onStop={handleTimerStop} />
       )}
+      <ProgressBar current={currentQuestionIndex} total={questions.length} completed={quizCompleted} />
       {!quizCompleted ? (
         <div className="w-full mt-10 p-4">
           <h2 className="text-3xl bg-slate-200 py-5 px-4 rounded-lg shadow-lg">
@@ -127,10 +104,10 @@ const Quiz = () => {
           </h2>
           <div className="flex flex-col">
             {questions[currentQuestionIndex].options.map((option) => (
-              <OpcionRespuesta
+              <Option
                 key={option}
-                texto={option}
-                esCorrecta={option === questions[currentQuestionIndex].correctAnswer}
+                text={option}
+                isCorrect={option === questions[currentQuestionIndex].correctAnswer}
                 onAnswer={handleAnswer}
               />
             ))}
@@ -142,7 +119,12 @@ const Quiz = () => {
           <h2 className="text-4xl text-center text-pink-500 uppercase font-bold mb-6 ">
             ¡Felicidades lo has completado!
           </h2>
-          <a href="./resultados" className="py-3 w-1/2 bg-pink-500 text-white text-xl font-semibold rounded-lg shadow-lg" >Continuar</a>
+          <button
+            onClick={enviarResultados}
+            className="py-3 w-1/2 bg-pink-500 text-white text-xl font-semibold rounded-lg shadow-lg"
+          >
+            Continuar
+          </button>
         </div>
       )}
     </div>

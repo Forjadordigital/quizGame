@@ -1,4 +1,6 @@
 ---
+import { ViewTransitions } from 'astro:transitions';
+
 interface Props {
 	title: string;
 }
@@ -11,10 +13,11 @@ const { title } = Astro.props;
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="description" content="Astro description" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		<ViewTransitions fallback="none" />
 		<script is:inline src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
 	</head>
 	<body>
@@ -32,9 +35,29 @@ const { title } = Astro.props;
 
 	body{
 		min-height: 100vh;
-		background: linear-gradient(to right top, #051937, #004d7a, #008793, #00bf72, #a8eb12);
+		background-image: linear-gradient(to top, #070a0d, #0a0d10, #0d1012, #101214, #121416);
 		background-repeat: no-repeat;
 		background-size: cover;
+	}
+
+	@keyframes shake {
+		0%, 100% { transform: translateX(0); }
+		20%, 60% { transform: translateX(-10px); }
+		40%, 80% { transform: translateX(10px); }
+	}
+
+	@keyframes bump {
+		0%, 100% { transform: scale(1); }
+		20%, 60% { transform: scale(.9); }
+		40%, 80% { transform: scale(1); }
+	}
+
+	.animate-shake {
+		animation: shake 0.3s ease-in-out;
+	}
+
+	.animate-bump {
+		animation: bump 0.5s ease-in-out;
 	}
 
 </style>
